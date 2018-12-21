@@ -1,0 +1,14 @@
+/** Main.jack 
+	Sara Kim
+	nand2tetris Project 9
+*/
+
+class Main {
+	function void main(){
+		var HangmanGame game;
+		let game = HangmanGame.new();
+		do game.run();
+		do game.dispose();
+		return;
+	}
+}

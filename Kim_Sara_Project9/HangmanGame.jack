@@ -1,0 +1,203 @@
+/** HangmanGame.jack 
+	Sara Kim
+	nand2tetris Project 9
+*/
+
+class HangmanGame {
+	field String answer;
+	field String correct;
+	field int keyPress;
+
+	// create a new game
+	constructor HangmanGame new(){
+		var String guessString;
+		var int i;
+		var int answerLength;
+		let guessString = "Number of Guesses:";
+		let i = 0;
+
+		do chooseWord();
+		let correct = String.new(answer.length());
+		while(i < (answer.length())) {
+			let correct = correct.appendChar(219);
+			let i = i + 1;
+		}
+
+		do Output.printString(guessString);
+		do Output.println();
+		return this;
+	}
+
+	method void dispose() {
+		do Memory.deAlloc(this);
+		return;
+	}
+
+	// run the game
+	method void run() {
+		var String loseMessage, winMessage;
+		var boolean gameOver;
+		var int line, wrong;
+		var char guess;
+
+		let line = 3;		
+		let wrong = 0;
+		let gameOver = false;
+		let loseMessage = "GAME OVER!";
+		let winMessage = "YOU WIN!";
+
+		// draw the hanging post for the hangman
+		do Screen.setColor(true);
+		// draw hanging noose
+			do Screen.drawRectangle(302, 40, 308, 70);
+		// draw noose holder
+			do Screen.drawRectangle(232, 40, 302, 45);
+		// draw hanging post pole
+			do Screen.drawRectangle(232, 45, 242, 200);
+		// draw hanging post base
+			do Screen.drawRectangle(202, 200, 282, 215);
+
+		// while not game over...
+		while (~(gameOver)){
+			// print the correct guesses made then move to next line
+			do Output.printString(correct);
+			do Output.moveCursor(line, 15);
+			let line = line + 1;
+			// read the guessing letter from user
+			let guess = Keyboard.readChar();
+			do Output.println();
+
+			if(~(checkGuess(guess))){
+				// For every wrong, draw out each parts of the hangman
+				if(wrong = 0) {do drawHead();}
+				if(wrong = 1) {do drawBody();}
+				if(wrong = 2) {do drawRightL();}
+				if(wrong = 3) {do drawLeftL();}
+				if(wrong = 4) {do drawRightA();}
+				// Once the last part, the left leg, is drawn it's game over
+				if(wrong = 5) {
+					do drawLeftA();
+					do Output.printString(loseMessage);
+					let gameOver = true;
+				}
+				let wrong = wrong + 1;
+			}
+			if(checkWin()) {
+				do Output.printString(answer);
+				do Output.println();
+				do Output.printString(winMessage);
+				let gameOver = true;
+			}			
+		}
+		return;
+	}
+
+	// Keyboard numbers found by printing the integer after each key press:
+	// 0 = 48	1 = 49	2 = 50	3 = 51	
+	// 4 = 52	5 = 53	6 = 54	
+	// 7 = 55	8 = 56	9 = 57 
+	method void chooseWord() {
+		var Array words;
+		var String message;
+		let message = "Type a number from 0-9: ";
+		let keyPress = 0;
+
+		// store the words to use as answers for the game
+		let words = Array.new(10);
+		let words[0] = "BLANKET";
+		let words[1] = "DRAGON";
+		let words[2] = "PLANET";
+		let words[3] = "HOSPITAL";
+		let words[4] = "BLOUSE";
+		let words[5] = "PANDA";
+		let words[6] = "CROWN";
+		let words[7] = "ORANGE";
+		let words[8] = "ZEBRA";
+		let words[9] = "CASTLE";
+
+		do Output.printString(message);
+		do Output.println();
+
+		// waits for a key to be pressed
+		while(keyPress = 0){
+			let keyPress = Keyboard.keyPressed();
+		}
+			// depending on whatever number the user chooses, 
+			// the word they have to guess is different
+			if (keyPress = 48) {let answer = words[0];}
+			if (keyPress = 49) {let answer = words[1];}
+			if (keyPress = 50) {let answer = words[2];}
+			if (keyPress = 51) {let answer = words[3];}
+			if (keyPress = 52) {let answer = words[4];}
+			if (keyPress = 53) {let answer = words[5];}
+			if (keyPress = 54) {let answer = words[6];}
+			if (keyPress = 55) {let answer = words[7];}
+			if (keyPress = 56) {let answer = words[8];}
+			if (keyPress = 57) {let answer = words[9];}
+		// wait for key to be released
+		while(~(keyPress = 0)){
+			let keyPress = Keyboard.keyPressed();
+		}	
+		return;																
+	}
+
+	// check whether the letter is part of answer
+	method boolean checkGuess(char guess) {
+		var int temp;
+		let temp = 0;
+
+		// go through answer word to compare with guessing letter
+		while(temp < answer.length()) {
+			if(guess = answer.charAt(temp)) {
+				do correct.setCharAt(temp, guess);
+				return true;
+			}
+			let temp = temp + 1;
+		}
+		return false;
+	}
+
+	// check if game is a win
+	method boolean checkWin() {
+		var int temp;
+		let temp = 0;
+
+		while(temp < correct.length()) {
+			if(correct.charAt(temp) = 219) {
+				return false;
+			}
+			let temp = temp + 1;
+		}
+		return true;
+	}	
+
+	// drawing functions for the hangman
+	method void drawHead() {
+		do Screen.drawCircle(305, 90, 20);
+		do Screen.setColor(false);
+		do Screen.drawCircle(305, 90, 19);
+		do Screen.setColor(true);
+		return;
+	}
+	method void drawBody() {
+		do Screen.drawRectangle(305, 110, 305, 160);
+		return;
+	}
+	method void drawRightA() {
+		do Screen.drawLine(305, 135, 320, 120);
+		return;
+	}
+	method void drawLeftA() {
+		do Screen.drawLine(305, 135, 290, 120);
+		return;
+	}
+	method void drawRightL() {
+		do Screen.drawLine(305, 160, 325, 180);
+		return;
+	}
+	method void drawLeftL() {
+		do Screen.drawLine(305, 160, 285, 180);
+		return;
+	}
+
+}
